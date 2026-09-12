@@ -55,6 +55,25 @@ delete the script itself. Its absence from a repo means setup finished.
 Then start with `docs/agent-usage.md` (the human playbook) — first task
 via the `new-task` skill.
 
+## Enforced invariants
+
+Two of the pipeline's rules are enforced by `PreToolUse` hooks rather than by
+prose the agents may or may not have loaded:
+
+- `.claude/hooks/guard-main-commit.sh`, wired up in `.claude/settings.json`,
+  blocks `git commit` on `main` unless MERGE_HEAD is present (`approve-task`'s
+  verified merge) or every path in the commit is under `tasks/` (the
+  planning-flip bookkeeping commit).
+- `.claude/hooks/guard-reviewer-writes.sh`, wired up in the Reviewer agent's
+  frontmatter, confines that role's writes to `tasks/` and the friction log,
+  so it produces verdicts rather than patches.
+
+Both prefer `jq` and fall back to `sed` where it isn't installed. The
+Reviewer's guard lives in agent frontmatter, so Claude Code runs it only after
+the workspace trust dialog is accepted for this folder; until then the
+Reviewer runs with the guard silently skipped. The `main` guard lives in
+settings, which has a looser trust rule.
+
 ## Pipeline architecture
 
 The pipeline's rules live once, in `pipeline.md`; every other file links

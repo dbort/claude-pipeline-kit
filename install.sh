@@ -51,9 +51,9 @@ if [ "$TARGET_ABS" = "$KIT_DIR" ] || [ -e "$TARGET/templates/.claude/docs/pipeli
   exit 1
 fi
 
-# Refuse to clobber an existing installation or an existing CLAUDE.md;
+# Refuse to clobber an existing installation, CLAUDE.md, or settings file;
 # merging is a manual job, not this script's.
-for f in CLAUDE.md .claude/docs/pipeline.md; do
+for f in CLAUDE.md .claude/docs/pipeline.md .claude/settings.json; do
   if [ -e "$TARGET/$f" ]; then
     echo "error: $TARGET/$f already exists; refusing to overwrite. Merge by hand or remove it first." >&2
     exit 1

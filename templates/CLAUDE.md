@@ -18,7 +18,11 @@ absolutes must never be style-swept.
 ## Invariants
 
 - Never commit task work directly to `main`; all task work happens on the
-  task's `{TASK_PREFIX}-XXX` branch (`pipeline.md` § Git branching).
+  task's `{TASK_PREFIX}-XXX` branch (`pipeline.md` § Git branching). A
+  `PreToolUse` hook (`.claude/settings.json` →
+  `.claude/hooks/guard-main-commit.sh`) blocks a `git commit` on `main` unless
+  it is `approve-task`'s verified merge or a bookkeeping commit touching only
+  `tasks/`. A block is the invariant working; don't route around it.
 - Advance a task's phase only via the owning skill — `new-task`,
   `dispatch-tasks`, `approve-task` — never by calling the
   Implementer/Reviewer subagents directly as a shortcut, unless the user
