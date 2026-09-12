@@ -84,8 +84,9 @@ each question and its recommended answer clear.
 
 **File content — code comments, docs, commit messages:** normal full
 prose, regardless of any conversational-brevity rules in effect. Distilled
-from `doc-hygiene`'s rules (`.claude/skills/doc-hygiene/SKILL.md`; keep the
-two in sync):
+from `doc-hygiene`'s rules
+(`.claude/skills/doc-hygiene/scripts/hygiene-workflow.js`; keep the two in
+sync):
 - Comments explain *why* (non-obvious rationale, tradeoff, constraint) —
   never restate the adjacent code.
 - State current behavior as though it has always been this way; no
