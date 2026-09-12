@@ -1,3 +1,11 @@
+---
+name: approve-task
+description: Human sign-off for a {TASK_PREFIX} task sitting at user_signoff - finalize its task file, re-sweep the branch with doc-hygiene, and merge it into main once both verification tiers pass. Invoking it IS the approval.
+argument-hint: "[task-id]"
+disable-model-invocation: true
+allowed-tools: Bash(git *)
+---
+
 # Skill: Approve & Merge a Task
 
 ## Purpose
@@ -6,7 +14,10 @@ Perform the User (Sign-off) step of the `tasks/active/*.md` pipeline (`.claude/d
 Invoking this skill against a specific task IS the human sign-off act. There is no separate confirmation prompt inside this skill — deciding to run `/approve-task {TASK_PREFIX}-XXX` is the approval; the skill's job is to execute it correctly, not to re-ask whether you meant it.
 
 ## Invocation
-`/approve-task {TASK_PREFIX}-XXX` — the task id is required, always. There's no auto-detection of "the" task at `user_signoff`: more than one task can be sitting there at once, so guessing which one you mean is worse than asking you to say it.
+`/approve-task {TASK_PREFIX}-XXX` — the task id is required, always.
+
+**Target task: `$0`** — if that reads as an empty string or as the literal
+text `$0`, no task id was supplied; stop at Step 1 and ask for one. There's no auto-detection of "the" task at `user_signoff`: more than one task can be sitting there at once, so guessing which one you mean is worse than asking you to say it.
 
 ## Execution Protocol
 
@@ -55,7 +66,7 @@ A task branch can pick up commits after `dispatch-tasks`' post-review `doc-hygie
 State plainly: what got merged, whether `doc-hygiene` found anything to fix, whether the branch was deleted. List any other tasks still in `tasks/active/` (id + `current_phase`) as a reminder — not an action taken — that they may be worth merging `main` into to check for coexistence; this skill only ever touches the one branch it was invoked on plus `main`.
 
 ## Constraints
-- Never invoke this skill from `dispatch-tasks` or any other unattended loop. `user_signoff` is explicitly human-gated (`pipeline.md` § Phases); this skill exists to be run BY a human, not on their behalf, and it treats invocation itself as the approval — that only holds if a human is the one doing the invoking.
+- Never invoke this skill from `dispatch-tasks` or any other unattended loop. `user_signoff` is explicitly human-gated (`pipeline.md` § Phases); this skill exists to be run BY a human, not on their behalf, and it treats invocation itself as the approval — that only holds if a human is the one doing the invoking. The `disable-model-invocation: true` in this file's frontmatter enforces that: Claude Code blocks a model-initiated call, so only a human typing `/approve-task {TASK_PREFIX}-XXX` reaches this protocol.
 - Never push to a remote. Every git operation here is local-only; publishing `main` (or anything else) is a separate, explicit action for the human to take.
 - Never `git branch -D` — only the safety-checked `-d`.
 - One task per invocation, even if several are eligible. Matches `dispatch-tasks`' own one-task-at-a-time discipline, for the same reason: all task work shares one working tree.

@@ -1,4 +1,15 @@
+---
+name: dispatch-tasks
+description: Advance one named {TASK_PREFIX} task through implementation and review, stopping at the next human gate. Use when asked to dispatch, run, advance, or continue a task by id (e.g. "dispatch {TASK_PREFIX}-022"), and on every /loop wake-up.
+argument-hint: "[task-id]"
+allowed-tools: Bash(./pipeline-setup.sh), Bash(git *)
+---
+
 # Skill: Task Dispatcher
+
+**Target task: `$0`** — if that reads as an empty string or as the literal
+text `$0`, no task id was supplied; stop and ask which task to name rather
+than guessing.
 
 ## Purpose
 Drive one named task through the `tasks/active/*.md` pipeline (`.claude/docs/pipeline.md`), so the Planner/Implementer/Reviewer handoff doesn't require the user to manually invoke each subagent. Requires a target task id as an argument, e.g. `dispatch-tasks {TASK_PREFIX}-022` — this skill only ever acts on that one task, never scans `tasks/active/` for something else to work on. If invoked with no id, stop and ask which task to name rather than guessing.

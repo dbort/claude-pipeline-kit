@@ -1,3 +1,10 @@
+---
+name: new-task
+description: Interview the user about a new {TASK_PREFIX} task and generate its task file under tasks/active/. Use when the user wants to start, plan, spec, or write up a new task, asks for a task file, or says "new task".
+argument-hint: "[short description of the task]"
+allowed-tools: Bash(./pipeline-setup.sh), Bash(ls tasks/*), Bash(git log *)
+---
+
 # Skill: Task Discovery & File Generator
 
 ## Purpose

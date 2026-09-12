@@ -1,3 +1,10 @@
+---
+name: doc-hygiene
+description: Sweep code comments and markdown docs for content rot and AI-writing-style tells, then verify no technical fact was lost. Use before committing prose or comment changes, and on a task branch after review approves it.
+argument-hint: "[--diff[=<ref>]] [path]"
+allowed-tools: Bash(git ls-files *), Bash(git diff *), Bash(git log *)
+---
+
 # Skill: Doc & Comment Hygiene
 
 ## Purpose
