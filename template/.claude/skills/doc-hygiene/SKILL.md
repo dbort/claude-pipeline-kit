@@ -28,24 +28,35 @@ License, Copyright (c) 2025 Hardik Pandya); see
 1. **List files:** tracked text files in scope (`git grep -Il '' --
    <scope>` finds them, whatever the project's languages), excluding
    `tasks/`, `.claude/`, and `CLAUDE.md` (agent contracts whose absolutes
-   are deliberate); license and notice files; lockfiles; and generated or
-   vendored files, whether marked `linguist-generated` or
-   `linguist-vendored` in `.gitattributes` or recognizable as such. Drop
-   deleted paths. Stop if the list is empty.
+   are deliberate); license and notice files; lockfiles; test fixtures
+   such as `tests/fixtures/`, whose text is test data that tests read and
+   assert on; and generated or vendored files, whether marked
+   `linguist-generated` or `linguist-vendored` in `.gitattributes` or
+   recognizable as such. Drop deleted paths. Stop if the list is empty.
 2. **Edit:** run one `hygiene` subagent (no shell, so no git) with the
    file list, each file's `git diff <ref>...HEAD` hunks in diff mode, and
    this brief: apply `CLAUDE.md` § Writing style by destination to
    comments and markdown prose only; never change executable code,
    config, command syntax, or markdown structure; leave clean text
    untouched; preserve every technical fact and rationale; flag, don't
-   fix, a comment that contradicts the code. In diff mode, edit only the
+   fix, a comment that contradicts the code. Apply the one-home and
+   frugal-docs rules: grep the code for each tunable value (limit,
+   default, list of names) a doc states and replace the copy with a
+   pointer to the constant, file or test that owns it; replace content
+   another doc already holds with a link to that doc; cut from a user doc
+   edge cases that an error or warning message reports, but keep the
+   rules its reader must follow. A fact replaced by a pointer counts as
+   preserved. The editor may read `.claude/docs/`, `CLAUDE.md` and the
+   skills, which are outside the file list, and reports any such copy in
+   them without editing it. In diff mode, edit only the
    changed lines plus any nearby comment they made stale. Report each
    edit as `file:line before -> after`.
 3. **Verify:** run a second, fresh `hygiene` subagent with `git diff` of
    those files (the uncommitted edits) and the editor's report, told to
    edit nothing. It reports PASS or FLAGGED per file: a changed claim
-   about behavior, a deleted rationale, or, in diff mode, edits outside
-   the changed regions. Revert any flagged hunk that lost real content.
+   about behavior, a deleted rationale with no pointer to where it
+   lives, or, in diff mode, edits outside the changed regions. Revert
+   any flagged hunk that lost real content.
 4. **Check:** run `tools/check`. A failure means an edit touched more
    than prose: stop and report it; do not auto-fix.
-5. **Report** the edits by file.
+5. **Report** the edits by file, and any copies the editor found in agent docs.

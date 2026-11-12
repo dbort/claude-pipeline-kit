@@ -59,8 +59,6 @@ commits the merge. Its contract:
   in for the full run at a review or a merge.
 - A check that needs the network runs by default, fails on any network
   error, and skips itself only under `--offline`.
-- A check that needs live infrastructure becomes a durable check inside
-  `tools/check`, never a one-off command.
 
 Run a slow check once per checkpoint. Save its output and exit status, for
 example `tools/check > "$out" 2>&1; echo "exit=$?"`, then read that file as
@@ -112,12 +110,25 @@ limit a task's total rounds. The log is append-only: it is the task's review rec
 - **Frontmatter:** `id`, `title`, and optional `blocked_by: [task-XXX, ...]`
   listing hard blockers only: tasks this one's code cannot proceed
   without. `/work` refuses a task whose blockers are not all in
-  `tasks/completed/`. Advisory sequencing goes in `## Advice` prose.
-- **Sections:** `## Summary` (plain prose for a human, 1-3 sentences),
-  `## Must Have` (machine-checkable conditions), `## Advice` (decisions in
-  force, each with its reason), `## Plan` (ordered checklist), `## Review
-  log`. A decision the user makes during `/work` is appended to `## Advice`
-  and binds the reviewer like any other.
+  `tasks/completed/`. Advisory sequencing goes in `## Notes`.
+- **Sections**, in order:
+  - `## Summary`: plain prose for a human, 1-3 sentences.
+  - `## Must Have`: observable, machine-checkable behavior. Binding.
+  - `## Decisions`: the user's decisions and verified facts about outside
+    tools, each with its reason. Binding. A decision the user makes during
+    `/work` is appended here with its date.
+  - `## Notes`: pointers into the code, suggested approaches, things to
+    verify early, the known dependents of a rename, deletion or fixture
+    change (by file, no line numbers), and ordering constraints with their
+    reasons. Not binding.
+  - `## Checklist`: empty in the plan. `/work` writes its own steps here
+    and ticks each as it lands, so a resumed task shows where it stopped.
+    Not binding.
+  - `## Review log`: § Review loop.
+- **Deviations:** when `/work` departs from a Note, it appends a dated line
+  to `## Notes` saying what it did and why. When it thinks a Must Have or
+  Decision is wrong, it stops and asks the user. The reviewer never rejects
+  a branch for departing from Notes or the Checklist.
 
 ## Roadmap
 
@@ -133,7 +144,10 @@ in dependency order, with a checklist directly below it:
     - [ ] task-010: second delivering task (blocked on task-009)
 
 `/new-task` adds the task's checklist line and status id in the same
-commit as the task file. `/ship` ticks the task's box, and when it was the
+commit as the task file. It also moves the milestone's scope bullets that
+the task covers into the task file and deletes them from the roadmap,
+which keeps each milestone's goal, `**Done when:**` and any decisions no
+task has settled yet. `/ship` ticks the task's box, and when it was the
 last box, deletes the milestone's section. No other step edits a status
 line or a box.
 
@@ -142,8 +156,10 @@ line or a box.
 - Task work happens on a branch named exactly `task-XXX`, created from
   `main` by the first `/work`. A resumed task continues on the same
   branch.
-- Task work never commits directly to `main`. The only task commits on
-  `main` are `/new-task`'s plan file and `/ship`'s verified merge.
+- Task work and ad hoc fixes never commit directly to `main`. Meta
+  records do: `/new-task`'s plan file, and a log entry for an issue
+  already on `main` (`friction-log.md`, `bug-log.md`). The only other
+  commit on `main` is `/ship`'s verified merge.
 - Everything is local. No agent fetches, pulls, or pushes.
 - Run `git branch --show-current` before every `git add` or `git commit`.
   Task work leaves the tree on the task branch, and a commit meant for
